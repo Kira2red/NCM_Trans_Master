@@ -1,0 +1,1106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NCM Converter — Free Online NCM to MP3/FLAC Tool</title>
+  <meta name="description" content="Convert .ncm files to MP3 or FLAC instantly in your browser. No upload, no registration, 100% free." />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0f1117;
+      --surface: #1a1d27;
+      --surface2: #232636;
+      --border: #2e3148;
+      --accent: #6c63ff;
+      --accent-hover: #8a83ff;
+      --text: #e8eaf0;
+      --text-muted: #8b8fa8;
+      --success: #4caf84;
+      --error: #e05c6e;
+      --radius: 12px;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── NAV ── */
+    nav {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 0 32px;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .nav-logo {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--accent);
+      text-decoration: none;
+      letter-spacing: -0.3px;
+    }
+    .nav-links { display: flex; gap: 28px; list-style: none; }
+    .nav-links a {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 14px;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--text); }
+
+    /* ── HERO ── */
+    .hero {
+      text-align: center;
+      padding: 72px 24px 48px;
+    }
+    .hero h1 {
+      font-size: clamp(28px, 5vw, 48px);
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      line-height: 1.2;
+      margin-bottom: 16px;
+    }
+    .hero h1 span { color: var(--accent); }
+    .hero p {
+      color: var(--text-muted);
+      font-size: 17px;
+      max-width: 520px;
+      margin: 0 auto 40px;
+      line-height: 1.6;
+    }
+    .badges {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-bottom: 40px;
+    }
+    .badge {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 6px 14px;
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+    .badge span { color: var(--success); margin-right: 5px; }
+
+    /* ── CONVERTER CARD ── */
+    .container { max-width: 800px; margin: 0 auto; padding: 0 24px; width: 100%; }
+
+    .converter-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+
+    /* drop zone */
+    .drop-zone {
+      border: 2px dashed var(--border);
+      border-radius: 10px;
+      margin: 28px;
+      padding: 60px 24px;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+      position: relative;
+    }
+    .drop-zone:hover, .drop-zone.dragging {
+      border-color: var(--accent);
+      background: rgba(108,99,255,0.06);
+    }
+    .drop-zone input[type="file"] {
+      position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%;
+    }
+    .drop-icon { font-size: 48px; margin-bottom: 16px; }
+    .drop-zone h2 { font-size: 20px; font-weight: 600; margin-bottom: 8px; }
+    .drop-zone p { color: var(--text-muted); font-size: 14px; }
+    .drop-zone p strong { color: var(--accent); }
+
+    /* file list */
+    #file-list { display: none; flex-direction: column; gap: 10px; margin: 0 28px 24px; }
+    #file-list.visible { display: flex; }
+
+    .file-item {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .file-cover {
+      width: 44px; height: 44px; border-radius: 6px;
+      background: var(--border);
+      object-fit: cover;
+      flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px;
+      overflow: hidden;
+    }
+    .file-cover img { width: 100%; height: 100%; object-fit: cover; border-radius: 6px; }
+    .file-meta { flex: 1; min-width: 0; }
+    .file-name { font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .file-info { font-size: 12px; color: var(--text-muted); margin-top: 3px; }
+    .file-status {
+      font-size: 12px; font-weight: 600; padding: 4px 10px; border-radius: 20px;
+      white-space: nowrap;
+    }
+    .file-status.waiting { background: rgba(139,143,168,0.15); color: var(--text-muted); }
+    .file-status.converting { background: rgba(108,99,255,0.2); color: var(--accent); }
+    .file-status.done { background: rgba(76,175,132,0.2); color: var(--success); }
+    .file-status.error { background: rgba(224,92,110,0.2); color: var(--error); }
+
+    .progress-bar-wrap {
+      height: 3px; background: var(--border); border-radius: 2px; margin-top: 8px; overflow: hidden;
+    }
+    .progress-bar { height: 100%; background: var(--accent); width: 0; transition: width 0.3s; border-radius: 2px; }
+
+    .btn-download {
+      background: none; border: 1px solid var(--success); color: var(--success);
+      border-radius: 6px; padding: 5px 12px; font-size: 12px; cursor: pointer;
+      transition: background 0.2s;
+    }
+    .btn-download:hover { background: rgba(76,175,132,0.15); }
+
+    /* actions */
+    .actions {
+      display: flex;
+      gap: 12px;
+      padding: 0 28px 28px;
+      justify-content: flex-end;
+      align-items: center;
+    }
+    .btn-convert {
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 12px 28px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+    }
+    .btn-convert:hover { background: var(--accent-hover); }
+    .btn-convert:active { transform: scale(0.97); }
+    .btn-convert:disabled { opacity: 0.45; cursor: not-allowed; }
+
+    .btn-clear {
+      background: none; border: 1px solid var(--border); color: var(--text-muted);
+      border-radius: 8px; padding: 12px 20px; font-size: 14px; cursor: pointer;
+      transition: border-color 0.2s, color 0.2s;
+    }
+    .btn-clear:hover { border-color: var(--text-muted); color: var(--text); }
+
+    /* ── FEATURES ── */
+    .features {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 16px;
+      margin: 56px 0;
+    }
+    .feature-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+    }
+    .feature-icon { font-size: 28px; margin-bottom: 12px; }
+    .feature-card h3 { font-size: 15px; font-weight: 600; margin-bottom: 6px; }
+    .feature-card p { font-size: 13px; color: var(--text-muted); line-height: 1.5; }
+
+    /* ── FAQ ── */
+    .section-title {
+      font-size: 24px; font-weight: 700; margin-bottom: 24px; letter-spacing: -0.3px;
+    }
+    .faq { margin: 56px 0; }
+    .faq-item { border-bottom: 1px solid var(--border); }
+    .faq-q {
+      width: 100%; background: none; border: none; color: var(--text);
+      text-align: left; padding: 18px 4px;
+      font-size: 15px; font-weight: 600; cursor: pointer;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .faq-q:hover { color: var(--accent); }
+    .faq-chevron { transition: transform 0.25s; font-size: 12px; color: var(--text-muted); }
+    .faq-a { display: none; padding: 0 4px 16px; color: var(--text-muted); font-size: 14px; line-height: 1.7; }
+    .faq-item.open .faq-a { display: block; }
+    .faq-item.open .faq-chevron { transform: rotate(180deg); }
+
+    /* ── FOOTER ── */
+    footer {
+      margin-top: auto;
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      padding: 32px 24px;
+    }
+    .footer-inner {
+      max-width: 800px; margin: 0 auto;
+      display: flex; flex-wrap: wrap; gap: 16px;
+      justify-content: space-between; align-items: center;
+    }
+    .footer-copy { font-size: 13px; color: var(--text-muted); }
+    .footer-links { display: flex; gap: 20px; flex-wrap: wrap; }
+    .footer-links a { font-size: 13px; color: var(--text-muted); text-decoration: none; }
+    .footer-links a:hover { color: var(--text); }
+
+    /* ── COOKIE BANNER ── */
+    #cookie-banner {
+      position: fixed; bottom: 0; left: 0; right: 0;
+      background: var(--surface2);
+      border-top: 1px solid var(--border);
+      padding: 16px 24px;
+      display: flex; gap: 16px; align-items: center; flex-wrap: wrap;
+      z-index: 999;
+      font-size: 13px; color: var(--text-muted);
+    }
+    #cookie-banner a { color: var(--accent); }
+    #cookie-banner.hidden { display: none; }
+    .btn-cookie {
+      background: var(--accent); color: #fff; border: none;
+      border-radius: 6px; padding: 8px 18px; font-size: 13px;
+      cursor: pointer; white-space: nowrap;
+    }
+
+    /* ── DEBUG PANEL ── */
+    #debug-toggle {
+      position: fixed; bottom: 72px; right: 20px;
+      background: var(--surface2); border: 1px solid var(--border);
+      color: var(--text-muted); border-radius: 8px;
+      padding: 7px 14px; font-size: 12px; cursor: pointer;
+      z-index: 200; font-family: inherit;
+      transition: border-color 0.2s, color 0.2s;
+    }
+    #debug-toggle:hover { border-color: var(--accent); color: var(--accent); }
+    #debug-panel {
+      position: fixed; bottom: 110px; right: 20px;
+      width: 480px; max-width: calc(100vw - 40px);
+      background: #0a0c14; border: 1px solid var(--border);
+      border-radius: var(--radius); z-index: 200;
+      display: none; flex-direction: column;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+      max-height: 360px;
+    }
+    #debug-panel.open { display: flex; }
+    .debug-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 10px 14px; border-bottom: 1px solid var(--border);
+      font-size: 12px; font-weight: 600; color: var(--text-muted);
+      flex-shrink: 0;
+    }
+    .debug-header span { color: var(--accent); }
+    .debug-actions { display: flex; gap: 8px; }
+    .debug-btn {
+      background: none; border: 1px solid var(--border); color: var(--text-muted);
+      border-radius: 4px; padding: 2px 8px; font-size: 11px; cursor: pointer;
+    }
+    .debug-btn:hover { border-color: var(--text-muted); color: var(--text); }
+    #debug-log {
+      flex: 1; overflow-y: auto; padding: 10px 14px;
+      font-family: 'SF Mono', 'Fira Code', monospace; font-size: 11.5px;
+      line-height: 1.7; color: #7c8099;
+    }
+    #debug-log .log-info  { color: #7c8099; }
+    #debug-log .log-ok    { color: var(--success); }
+    #debug-log .log-warn  { color: #e0a03c; }
+    #debug-log .log-error { color: var(--error); font-weight: 600; }
+    #debug-log .log-time  { color: #404560; margin-right: 6px; }
+
+    /* ── AD PLACEHOLDER ── */
+    .ad-slot {
+      background: var(--surface);
+      border: 1px dashed var(--border);
+      border-radius: 8px;
+      height: 90px;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--text-muted); font-size: 12px;
+      margin: 24px 0;
+    }
+
+    @media (max-width: 600px) {
+      nav { padding: 0 16px; }
+      .nav-links { gap: 16px; }
+      .drop-zone { margin: 16px; padding: 40px 16px; }
+      #file-list, .actions { margin-left: 16px; margin-right: 16px; }
+      .actions { padding-left: 16px; padding-right: 16px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a class="nav-logo" href="index.html">NCMConverter</a>
+  <ul class="nav-links">
+    <li><a href="index.html">Converter</a></li>
+    <li><a href="about.html">About</a></li>
+    <li><a href="contact.html">Contact</a></li>
+    <li><a href="privacy.html">Privacy</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <h1>Convert <span>.NCM</span> Files<br>to MP3 &amp; FLAC</h1>
+  <p>Free, instant, and 100% private. Your files never leave your browser — no uploads, no accounts required.</p>
+  <div class="badges">
+    <div class="badge"><span>✓</span> No Upload</div>
+    <div class="badge"><span>✓</span> Keeps Cover Art &amp; Tags</div>
+    <div class="badge"><span>✓</span> Batch Convert</div>
+    <div class="badge"><span>✓</span> Free Forever</div>
+  </div>
+</div>
+
+<!-- AD SLOT TOP -->
+<div class="container">
+  <div class="ad-slot">[ Advertisement ]</div>
+</div>
+
+<!-- CONVERTER -->
+<div class="container">
+  <div class="converter-card">
+    <div class="drop-zone" id="drop-zone">
+      <input type="file" id="file-input" accept=".ncm" multiple />
+      <div class="drop-icon">🎵</div>
+      <h2>Drop your .ncm files here</h2>
+      <p>or <strong>click to browse</strong> — supports batch selection</p>
+    </div>
+
+    <div id="file-list"></div>
+
+    <div class="actions" id="actions" style="display:none">
+      <button class="btn-clear" id="btn-clear">Clear All</button>
+      <button class="btn-convert" id="btn-convert">Convert All</button>
+    </div>
+  </div>
+</div>
+
+<!-- FEATURES -->
+<div class="container">
+  <div class="features">
+    <div class="feature-card">
+      <div class="feature-icon">🔒</div>
+      <h3>100% Private</h3>
+      <p>All processing happens locally in your browser. Zero data is sent to any server.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🖼️</div>
+      <h3>Preserves Metadata</h3>
+      <p>Cover art, song title, artist, and album tags are all retained in the output file.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">⚡</div>
+      <h3>Instant Conversion</h3>
+      <p>No waiting for uploads. Files convert in seconds directly on your device.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">📦</div>
+      <h3>Batch Support</h3>
+      <p>Select and convert multiple .ncm files at once — no need to go one by one.</p>
+    </div>
+  </div>
+</div>
+
+<!-- FAQ -->
+<div class="container">
+  <div class="faq">
+    <h2 class="section-title">Frequently Asked Questions</h2>
+
+    <div class="faq-item">
+      <button class="faq-q">What is an .ncm file? <span class="faq-chevron">▼</span></button>
+      <div class="faq-a">NCM is a proprietary encrypted audio format used by NetEase Cloud Music (网易云音乐). The file contains a standard MP3 or FLAC audio stream that has been encrypted so it can only be played inside the NetEase app. NCMConverter decrypts and extracts that audio so you can play it anywhere.</div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-q">Are my files uploaded to your server? <span class="faq-chevron">▼</span></button>
+      <div class="faq-a">No. Every step of the conversion runs entirely in your browser using JavaScript. Your music files never leave your device, and we never have access to them.</div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-q">What output formats are supported? <span class="faq-chevron">▼</span></button>
+      <div class="faq-a">NCM files internally contain either an MP3 or a FLAC audio stream. NCMConverter extracts and saves the original format — so you'll get an MP3 or FLAC file depending on what was stored inside the .ncm container. No re-encoding means zero quality loss.</div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-q">Is there a file size or quantity limit? <span class="faq-chevron">▼</span></button>
+      <div class="faq-a">There are no artificial limits. You can convert as many files as you like in one batch. The only practical limit is your browser's available memory, which is typically enough for dozens of files at once.</div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-q">Will cover art and song tags be preserved? <span class="faq-chevron">▼</span></button>
+      <div class="faq-a">Yes. NCMConverter reads the embedded metadata (track name, artist, album, cover image) stored inside the .ncm file and writes it into the output MP3 or FLAC, so your music library stays organized.</div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-q">Is this tool free to use? <span class="faq-chevron">▼</span></button>
+      <div class="faq-a">Yes, completely free. The site is supported by non-intrusive display advertising. No account, no subscription, no hidden fees.</div>
+    </div>
+  </div>
+</div>
+
+<!-- AD SLOT BOTTOM -->
+<div class="container">
+  <div class="ad-slot">[ Advertisement ]</div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <span class="footer-copy">© 2025 NCMConverter. All rights reserved.</span>
+    <div class="footer-links">
+      <a href="about.html">About Us</a>
+      <a href="contact.html">Contact</a>
+      <a href="privacy.html">Privacy Policy</a>
+      <a href="terms.html">Terms of Service</a>
+    </div>
+  </div>
+</footer>
+
+<!-- COOKIE BANNER -->
+<div id="cookie-banner">
+  <span>We use cookies to improve your experience and serve relevant ads. See our <a href="privacy.html">Privacy Policy</a>.</span>
+  <button class="btn-cookie" id="btn-accept-cookie">Accept</button>
+</div>
+
+<!-- DEBUG PANEL -->
+<button id="debug-toggle">🛠 Debug</button>
+<div id="debug-panel">
+  <div class="debug-header">
+    <span>Debug Console</span>
+    <div class="debug-actions">
+      <button class="debug-btn" id="debug-copy">Copy</button>
+      <button class="debug-btn" id="debug-clear-log">Clear</button>
+    </div>
+  </div>
+  <div id="debug-log"><span class="log-info">Debug panel ready. Convert a file to see logs.</span></div>
+</div>
+
+<script>
+// ── Cookie banner ──────────────────────────────────────────────
+(function () {
+  const banner = document.getElementById('cookie-banner');
+  if (localStorage.getItem('cookieConsent')) banner.classList.add('hidden');
+  document.getElementById('btn-accept-cookie').addEventListener('click', () => {
+    localStorage.setItem('cookieConsent', '1');
+    banner.classList.add('hidden');
+  });
+})();
+
+// ── FAQ accordion ──────────────────────────────────────────────
+document.querySelectorAll('.faq-q').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const item = btn.closest('.faq-item');
+    const wasOpen = item.classList.contains('open');
+    document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('open'));
+    if (!wasOpen) item.classList.add('open');
+  });
+});
+
+// ── Debug panel ────────────────────────────────────────────────
+const debugPanel = document.getElementById('debug-panel');
+const debugLog   = document.getElementById('debug-log');
+const debugToggle = document.getElementById('debug-toggle');
+let logLines = [];
+
+function dblog(msg, level = 'info') {
+  const now = new Date();
+  const ts = now.toTimeString().slice(0, 8) + '.' + String(now.getMilliseconds()).padStart(3, '0');
+  const line = { ts, msg, level };
+  logLines.push(line);
+  const el = document.createElement('div');
+  el.innerHTML = `<span class="log-time">${ts}</span><span class="log-${level}">${escHtml(msg)}</span>`;
+  debugLog.appendChild(el);
+  debugLog.scrollTop = debugLog.scrollHeight;
+}
+
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+debugToggle.addEventListener('click', () => debugPanel.classList.toggle('open'));
+
+document.getElementById('debug-clear-log').addEventListener('click', () => {
+  logLines = [];
+  debugLog.innerHTML = '';
+});
+
+document.getElementById('debug-copy').addEventListener('click', () => {
+  const text = logLines.map(l => `[${l.ts}] [${l.level.toUpperCase()}] ${l.msg}`).join('\n');
+  navigator.clipboard.writeText(text).then(() => {
+    document.getElementById('debug-copy').textContent = 'Copied!';
+    setTimeout(() => { document.getElementById('debug-copy').textContent = 'Copy'; }, 1500);
+  });
+});
+
+// ── NCM Converter core ─────────────────────────────────────────
+const NCM_MAGIC = [0x43, 0x54, 0x45, 0x4e, 0x46, 0x44, 0x41, 0x4d]; // CTENFDAM
+
+const AES_KEY_1 = new Uint8Array([0x68, 0x7a, 0x48, 0x52, 0x41, 0x6d, 0x73, 0x6f,
+                                   0x35, 0x6b, 0x49, 0x6e, 0x62, 0x61, 0x78, 0x57]);
+const AES_KEY_2 = new Uint8Array([0x23, 0x31, 0x34, 0x6c, 0x6a, 0x6b, 0x5f, 0x21,
+                                   0x5c, 0x5d, 0x26, 0x30, 0x55, 0x3c, 0x27, 0x28]);
+
+// AES-128-ECB — pure JS implementation (WebCrypto has no ECB mode)
+// Based on the public domain AES spec
+const _AES = (() => {
+  const sbox = new Uint8Array(256);
+  const rsbox = new Uint8Array(256);
+  const rcon = new Uint8Array(11);
+  (() => {
+    let p = 1, q = 1;
+    do {
+      p = p ^ (p << 1) ^ (p & 0x80 ? 0x1b : 0);
+      q ^= q << 1; q ^= q << 2; q ^= q << 4; q ^= q & 0x80 ? 0x09 : 0;
+      const xf = 0x63 ^ q ^ (q << 1 | q >> 7) ^ (q << 2 | q >> 6) ^ (q << 3 | q >> 5) ^ (q << 4 | q >> 4);
+      sbox[p] = xf & 0xff; rsbox[xf & 0xff] = p;
+    } while ((p &= 0xff) !== 1);
+    sbox[0] = 0x63; rsbox[0x63] = 0;
+    let rc = 1;
+    for (let i = 1; i <= 10; i++) { rcon[i] = rc; rc = rc << 1 ^ (rc & 0x80 ? 0x1b : 0); rc &= 0xff; }
+  })();
+
+  function xtime(a) { return ((a << 1) ^ (a & 0x80 ? 0x1b : 0)) & 0xff; }
+  function mul(a, b) {
+    return ((b & 1 ? a : 0) ^ (b >> 1 & 1 ? xtime(a) : 0) ^ (b >> 2 & 1 ? xtime(xtime(a)) : 0) ^
+            (b >> 3 & 1 ? xtime(xtime(xtime(a))) : 0) ^ (b >> 4 & 1 ? xtime(xtime(xtime(xtime(a)))) : 0)) & 0xff;
+  }
+
+  function expandKey(key) {
+    const w = new Uint8Array(176);
+    w.set(key);
+    for (let i = 16; i < 176; i += 4) {
+      let t0 = w[i-4], t1 = w[i-3], t2 = w[i-2], t3 = w[i-1];
+      if (i % 16 === 0) {
+        const tmp = t0; t0 = sbox[t1] ^ rcon[i/16]; t1 = sbox[t2]; t2 = sbox[t3]; t3 = sbox[tmp];
+      }
+      w[i]   = w[i-16] ^ t0; w[i+1] = w[i-15] ^ t1;
+      w[i+2] = w[i-14] ^ t2; w[i+3] = w[i-13] ^ t3;
+    }
+    return w;
+  }
+
+  function decryptBlock(block, rk) {
+    const s = new Uint8Array(16);
+    s.set(block);
+    // AddRoundKey (round 10)
+    for (let i = 0; i < 16; i++) s[i] ^= rk[160 + i];
+    for (let round = 9; round >= 1; round--) {
+      // InvShiftRows
+      let t = s[13]; s[13] = s[9]; s[9] = s[5]; s[5] = s[1]; s[1] = t;
+      t = s[2]; s[2] = s[10]; s[10] = t; t = s[6]; s[6] = s[14]; s[14] = t;
+      t = s[3]; s[3] = s[7]; s[7] = s[11]; s[11] = s[15]; s[15] = t;
+      // InvSubBytes
+      for (let i = 0; i < 16; i++) s[i] = rsbox[s[i]];
+      // AddRoundKey
+      for (let i = 0; i < 16; i++) s[i] ^= rk[round * 16 + i];
+      // InvMixColumns
+      for (let c = 0; c < 4; c++) {
+        const i = c * 4;
+        const [a, b, d, e] = [s[i], s[i+1], s[i+2], s[i+3]];
+        s[i]   = mul(a,0xe) ^ mul(b,0xb) ^ mul(d,0xd) ^ mul(e,0x9);
+        s[i+1] = mul(a,0x9) ^ mul(b,0xe) ^ mul(d,0xb) ^ mul(e,0xd);
+        s[i+2] = mul(a,0xd) ^ mul(b,0x9) ^ mul(d,0xe) ^ mul(e,0xb);
+        s[i+3] = mul(a,0xb) ^ mul(b,0xd) ^ mul(d,0x9) ^ mul(e,0xe);
+      }
+    }
+    // Final round (no InvMixColumns)
+    let t = s[13]; s[13] = s[9]; s[9] = s[5]; s[5] = s[1]; s[1] = t;
+    t = s[2]; s[2] = s[10]; s[10] = t; t = s[6]; s[6] = s[14]; s[14] = t;
+    t = s[3]; s[3] = s[7]; s[7] = s[11]; s[11] = s[15]; s[15] = t;
+    for (let i = 0; i < 16; i++) s[i] = rsbox[s[i]];
+    for (let i = 0; i < 16; i++) s[i] ^= rk[i];
+    return s;
+  }
+
+  return { expandKey, decryptBlock };
+})();
+
+function aesDecrypt(key, data) {
+  const rk = _AES.expandKey(key);
+  const result = new Uint8Array(data.length);
+  for (let i = 0; i < data.length; i += 16) {
+    result.set(_AES.decryptBlock(data.slice(i, i + 16), rk), i);
+  }
+  return result;
+}
+
+function unpad(data) {
+  const pad = data[data.length - 1];
+  return data.slice(0, data.length - pad);
+}
+
+async function parseNCM(buffer) {
+  const view = new DataView(buffer);
+  const bytes = new Uint8Array(buffer);
+
+  dblog(`File size: ${buffer.byteLength} bytes`, 'info');
+  dblog(`Magic bytes: [${bytes.slice(0,8).join(', ')}]`, 'info');
+  dblog(`Expected:    [${NCM_MAGIC.join(', ')}]`, 'info');
+
+  // Check magic
+  for (let i = 0; i < 8; i++) {
+    if (bytes[i] !== NCM_MAGIC[i]) {
+      dblog(`Magic mismatch at byte ${i}: got 0x${bytes[i].toString(16).padStart(2,'0')} expected 0x${NCM_MAGIC[i].toString(16).padStart(2,'0')}`, 'error');
+      throw new Error('Not a valid NCM file (magic mismatch).');
+    }
+  }
+  dblog('Magic OK ✓', 'ok');
+
+  let offset = 10;
+  dblog(`bytes[8..9] (gap): 0x${bytes[8].toString(16)} 0x${bytes[9].toString(16)}`, 'info');
+
+  // ── RC4 key block ──
+  const keyLen = view.getUint32(offset, true); offset += 4;
+  dblog(`RC4 key block length: ${keyLen}`, 'info');
+  if (keyLen === 0 || keyLen > buffer.byteLength) {
+    dblog(`RC4 keyLen out of range! (${keyLen})`, 'error');
+    throw new Error(`Invalid RC4 key length: ${keyLen}`);
+  }
+
+  const keyData = bytes.slice(offset, offset + keyLen).map(b => b ^ 0x64);
+  offset += keyLen;
+  dblog(`RC4 key XOR-decoded (first 8): [${keyData.slice(0,8).join(', ')}]`, 'info');
+
+  let decKey;
+  try {
+    decKey = aesDecrypt(AES_KEY_1, keyData);
+    dblog('AES-1 decrypt OK ✓', 'ok');
+  } catch(e) {
+    dblog(`AES-1 decrypt failed: ${e.message}`, 'error');
+    throw e;
+  }
+
+  const unpadded = unpad(decKey);
+  dblog(`Unpadded key length: ${unpadded.length}, prefix: "${new TextDecoder().decode(unpadded.slice(0,17))}"`, 'info');
+
+  const rc4Key = unpadded.slice(17);
+  dblog(`RC4 key length after strip: ${rc4Key.length}`, 'info');
+  if (rc4Key.length === 0) {
+    dblog('RC4 key is empty after stripping prefix!', 'error');
+    throw new Error('RC4 key is empty — possible wrong AES key or corrupt file.');
+  }
+
+  // ── Metadata block ──
+  const metaLen = view.getUint32(offset, true); offset += 4;
+  dblog(`Metadata block length: ${metaLen}`, 'info');
+  let meta = null;
+  if (metaLen > 0) {
+    const metaData = bytes.slice(offset, offset + metaLen).map(b => b ^ 0x63);
+    offset += metaLen;
+    const prefixStr = new TextDecoder('utf-8', {fatal:false}).decode(new Uint8Array(metaData.slice(0, 22)));
+    dblog(`Meta prefix (22 bytes): "${prefixStr}"`, 'info');
+    const metaB64 = String.fromCharCode(...metaData.slice(22));
+    dblog(`Meta base64 length: ${metaB64.length}`, 'info');
+    try {
+      const metaDecrypted = aesDecrypt(AES_KEY_2, Uint8Array.from(atob(metaB64), c => c.charCodeAt(0)));
+      const metaStr = new TextDecoder().decode(unpad(metaDecrypted)).slice(6);
+      dblog(`Meta JSON preview: ${metaStr.slice(0,80)}`, 'info');
+      meta = JSON.parse(metaStr);
+      dblog(`Meta parsed OK — title: "${meta.musicName || meta.name}", artist: ${JSON.stringify(meta.artist)}`, 'ok');
+    } catch(e) {
+      dblog(`Meta decode/parse failed (non-fatal): ${e.message}`, 'warn');
+      meta = null;
+    }
+  } else {
+    dblog('No metadata block (metaLen=0)', 'warn');
+  }
+
+  // ── CRC + gap ──
+  offset += 4;
+  offset += 5;
+  dblog(`Offset after CRC+gap: ${offset}`, 'info');
+
+  // ── Cover image ──
+  const coverLen = view.getUint32(offset, true); offset += 4;
+  dblog(`Cover image length: ${coverLen}`, 'info');
+  let coverData = null;
+  if (coverLen > 0) {
+    coverData = bytes.slice(offset, offset + coverLen);
+    dblog(`Cover image read OK ✓ (${coverLen} bytes)`, 'ok');
+  } else {
+    dblog('No cover image', 'warn');
+  }
+  offset += coverLen;
+
+  dblog(`Audio data offset: ${offset}, audio size: ${bytes.length - offset} bytes`, 'info');
+
+  // ── Build RC4 keystream (S-box) ──
+  const S = new Uint8Array(256);
+  for (let i = 0; i < 256; i++) S[i] = i;
+  for (let i = 0, j = 0; i < 256; i++) {
+    j = (j + S[i] + rc4Key[i % rc4Key.length]) & 0xff;
+    [S[i], S[j]] = [S[j], S[i]];
+  }
+  const keystream = new Uint8Array(256);
+  for (let i = 0; i < 256; i++) {
+    const a = (i + 1) & 0xff;
+    const b = (S[a] + S[(a + S[a]) & 0xff]) & 0xff;
+    keystream[i] = S[b];
+  }
+  dblog('RC4 keystream built ✓', 'ok');
+
+  // ── Decrypt audio ──
+  const audioData = new Uint8Array(bytes.length - offset);
+  for (let i = 0; i < audioData.length; i++) {
+    audioData[i] = bytes[offset + i] ^ keystream[i & 0xff];
+  }
+  dblog(`Audio decrypted — first 4 bytes: [0x${audioData[0].toString(16)}, 0x${audioData[1].toString(16)}, 0x${audioData[2].toString(16)}, 0x${audioData[3].toString(16)}]`, 'info');
+
+  // Detect format
+  let format = 'mp3';
+  if (audioData[0] === 0x66 && audioData[1] === 0x4c && audioData[2] === 0x61 && audioData[3] === 0x43) {
+    format = 'flac';
+    dblog('Detected format: FLAC ✓', 'ok');
+  } else if ((audioData[0] === 0xff && (audioData[1] & 0xe0) === 0xe0) || (audioData[0] === 0x49 && audioData[1] === 0x44 && audioData[2] === 0x33)) {
+    format = 'mp3';
+    dblog('Detected format: MP3 ✓', 'ok');
+  } else {
+    dblog(`Unknown audio header: 0x${audioData[0].toString(16)} 0x${audioData[1].toString(16)} 0x${audioData[2].toString(16)} 0x${audioData[3].toString(16)} — defaulting to mp3`, 'warn');
+  }
+
+  return { audioData, format, meta, coverData };
+}
+
+// ── ID3v2.3 tag writer (MP3) ──────────────────────────────────
+function detectImageMime(data) {
+  if (data[0] === 0x89 && data[1] === 0x50 && data[2] === 0x4e && data[3] === 0x47) return 'image/png';
+  return 'image/jpeg';
+}
+
+function buildID3Tag(meta, coverData) {
+  const frames = [];
+
+  // ID3v2.3: frame size is plain big-endian uint32, NOT syncsafe
+  function makeFrame(id, body) {
+    const header = new Uint8Array(10);
+    for (let i = 0; i < 4; i++) header[i] = id.charCodeAt(i);
+    const size = body.length;
+    header[4] = (size >> 24) & 0xff;
+    header[5] = (size >> 16) & 0xff;
+    header[6] = (size >> 8)  & 0xff;
+    header[7] =  size        & 0xff;
+    // header[8] header[9] = flags, stay 0
+    const frame = new Uint8Array(10 + size);
+    frame.set(header); frame.set(body, 10);
+    return frame;
+  }
+
+  function textFrame(id, text) {
+    if (!text) return;
+    // encoding byte 0x01 = UTF-16LE with BOM
+    const enc = new TextEncoder().encode(text);
+    const body = new Uint8Array([0x00, ...enc]); // 0x00 = Latin-1/UTF-8
+    frames.push(makeFrame(id, body));
+  }
+
+  if (meta) {
+    textFrame('TIT2', meta.musicName || meta.name);
+    textFrame('TPE1', Array.isArray(meta.artist) ? meta.artist.map(a => a[0]).join(', ') : meta.artist);
+    textFrame('TALB', meta.album);
+  }
+
+  if (coverData) {
+    const mime = detectImageMime(coverData);
+    dblog(`Cover MIME detected: ${mime}`, 'info');
+    const mimeBytes = new TextEncoder().encode(mime);
+    // APIC body: encoding(1) + mime + null + pictype(1) + desc + null + imagedata
+    const body = new Uint8Array(1 + mimeBytes.length + 1 + 1 + 1 + coverData.length);
+    let p = 0;
+    body[p++] = 0x00;                          // encoding: ISO-8859-1
+    body.set(mimeBytes, p); p += mimeBytes.length;
+    body[p++] = 0x00;                          // null terminator for mime
+    body[p++] = 0x03;                          // picture type: front cover
+    body[p++] = 0x00;                          // description: empty string + null
+    body.set(coverData, p);
+    frames.push(makeFrame('APIC', body));
+    dblog(`APIC frame built: ${body.length} bytes`, 'ok');
+  }
+
+  // ID3v2.3 tag header — tag size is syncsafe (the ONE place it is)
+  const totalFrameSize = frames.reduce((s, f) => s + f.length, 0);
+  const tagSize = totalFrameSize; // syncsafe encode
+  const tagHeader = new Uint8Array(10);
+  tagHeader[0] = 0x49; tagHeader[1] = 0x44; tagHeader[2] = 0x33; // "ID3"
+  tagHeader[3] = 0x03; tagHeader[4] = 0x00;                       // version 2.3.0
+  tagHeader[5] = 0x00;                                            // flags
+  tagHeader[6] = (tagSize >> 21) & 0x7f;
+  tagHeader[7] = (tagSize >> 14) & 0x7f;
+  tagHeader[8] = (tagSize >>  7) & 0x7f;
+  tagHeader[9] =  tagSize        & 0x7f;
+
+  const tag = new Uint8Array(10 + totalFrameSize);
+  tag.set(tagHeader);
+  let pos = 10;
+  for (const f of frames) { tag.set(f, pos); pos += f.length; }
+  return tag;
+}
+
+// ── FLAC PICTURE block writer ──────────────────────────────────
+function buildFlacPictureBlock(coverData) {
+  // FLAC METADATA_BLOCK_PICTURE (type 6)
+  const mime = detectImageMime(coverData);
+  const mimeBytes = new TextEncoder().encode(mime);
+  const descBytes = new Uint8Array(0); // empty description
+
+  // Block data: picType(4) + mimeLen(4) + mime + descLen(4) + desc +
+  //             width(4) + height(4) + depth(4) + colors(4) + dataLen(4) + data
+  const dataSize = 4 + 4 + mimeBytes.length + 4 + descBytes.length + 4*4 + 4 + coverData.length;
+  const data = new Uint8Array(dataSize);
+  const dv = new DataView(data.buffer);
+  let p = 0;
+
+  dv.setUint32(p, 3, false); p += 4;                       // picture type: front cover
+  dv.setUint32(p, mimeBytes.length, false); p += 4;
+  data.set(mimeBytes, p); p += mimeBytes.length;
+  dv.setUint32(p, descBytes.length, false); p += 4;
+  data.set(descBytes, p); p += descBytes.length;
+  dv.setUint32(p, 0, false); p += 4;  // width (unknown)
+  dv.setUint32(p, 0, false); p += 4;  // height (unknown)
+  dv.setUint32(p, 0, false); p += 4;  // color depth (unknown)
+  dv.setUint32(p, 0, false); p += 4;  // colors used
+  dv.setUint32(p, coverData.length, false); p += 4;
+  data.set(coverData, p);
+
+  // FLAC metadata block header: type(1 byte) + length(3 bytes)
+  // type 6 = PICTURE, NOT last-metadata-block (bit7 = 0)
+  const blockHeader = new Uint8Array(4);
+  blockHeader[0] = 6; // PICTURE block, not last
+  blockHeader[1] = (data.length >> 16) & 0xff;
+  blockHeader[2] = (data.length >>  8) & 0xff;
+  blockHeader[3] =  data.length        & 0xff;
+
+  const block = new Uint8Array(4 + data.length);
+  block.set(blockHeader); block.set(data, 4);
+  return block;
+}
+
+function injectFlacCover(audioData, coverData) {
+  // FLAC stream: fLaC(4) + STREAMINFO block(38) + optional other blocks + frames
+  // We insert a PICTURE block after STREAMINFO, before the first audio frame.
+  // Strategy: scan blocks, find where "last metadata block" is, inject before it.
+  if (audioData.length < 42) return audioData;
+
+  const dv = new DataView(audioData.buffer, audioData.byteOffset);
+  let pos = 4; // skip "fLaC" marker
+  let insertAt = -1;
+  let lastBlockPos = -1;
+
+  while (pos < audioData.length - 4) {
+    const blockHeader = audioData[pos];
+    const isLast = (blockHeader & 0x80) !== 0;
+    const blockType = blockHeader & 0x7f;
+    const blockLen = (audioData[pos+1] << 16) | (audioData[pos+2] << 8) | audioData[pos+3];
+
+    if (isLast) {
+      lastBlockPos = pos;
+      insertAt = pos + 4 + blockLen; // insert right after this block
+      break;
+    }
+    // skip existing PICTURE blocks to avoid duplicates
+    if (blockType === 6) {
+      pos += 4 + blockLen;
+      continue;
+    }
+    pos += 4 + blockLen;
+  }
+
+  if (insertAt === -1) {
+    dblog('FLAC: could not find last metadata block, appending picture', 'warn');
+    insertAt = pos;
+  }
+
+  // Clear the "last block" flag on the current last metadata block
+  if (lastBlockPos !== -1) {
+    const patched = new Uint8Array(audioData);
+    patched[lastBlockPos] = patched[lastBlockPos] & 0x7f; // clear bit 7
+    audioData = patched;
+  }
+
+  const pictureBlock = buildFlacPictureBlock(coverData);
+  // Set "last metadata block" flag on our picture block
+  pictureBlock[0] = pictureBlock[0] | 0x80;
+
+  const result = new Uint8Array(audioData.length + pictureBlock.length);
+  result.set(audioData.slice(0, insertAt));
+  result.set(pictureBlock, insertAt);
+  result.set(audioData.slice(insertAt), insertAt + pictureBlock.length);
+  dblog(`FLAC PICTURE block injected at offset ${insertAt} (${pictureBlock.length} bytes)`, 'ok');
+  return result;
+}
+
+// ── UI logic ──────────────────────────────────────────────────
+const dropZone = document.getElementById('drop-zone');
+const fileInput = document.getElementById('file-input');
+const fileList = document.getElementById('file-list');
+const btnConvert = document.getElementById('btn-convert');
+const btnClear = document.getElementById('btn-clear');
+const actions = document.getElementById('actions');
+
+let files = [];
+
+function renderFileList() {
+  if (files.length === 0) {
+    fileList.classList.remove('visible');
+    actions.style.display = 'none';
+    return;
+  }
+  fileList.classList.add('visible');
+  actions.style.display = 'flex';
+  fileList.innerHTML = '';
+  files.forEach(item => {
+    const el = document.createElement('div');
+    el.className = 'file-item';
+    el.id = 'fi-' + item.id;
+
+    const cover = document.createElement('div');
+    cover.className = 'file-cover';
+    cover.textContent = '🎵';
+    if (item.coverSrc) {
+      cover.innerHTML = `<img src="${item.coverSrc}" />`;
+    }
+
+    const meta = document.createElement('div');
+    meta.className = 'file-meta';
+
+    const name = document.createElement('div');
+    name.className = 'file-name';
+    name.textContent = item.displayName || item.file.name;
+
+    const info = document.createElement('div');
+    info.className = 'file-info';
+    info.textContent = item.metaInfo || formatBytes(item.file.size);
+
+    const progress = document.createElement('div');
+    progress.className = 'progress-bar-wrap';
+    const bar = document.createElement('div');
+    bar.className = 'progress-bar';
+    bar.style.width = item.status === 'done' ? '100%' : (item.status === 'converting' ? '60%' : '0');
+    progress.appendChild(bar);
+
+    meta.appendChild(name);
+    meta.appendChild(info);
+    if (item.status === 'converting') meta.appendChild(progress);
+
+    const statusEl = document.createElement('div');
+    statusEl.className = 'file-status ' + item.status;
+    statusEl.textContent = { waiting: 'Waiting', converting: 'Converting…', done: 'Done', error: 'Error' }[item.status];
+
+    el.appendChild(cover);
+    el.appendChild(meta);
+    el.appendChild(statusEl);
+
+    if (item.status === 'done' && item.result) {
+      const dlBtn = document.createElement('button');
+      dlBtn.className = 'btn-download';
+      dlBtn.textContent = '↓ Download';
+      dlBtn.onclick = () => triggerDownload(item);
+      el.appendChild(dlBtn);
+    }
+
+    fileList.appendChild(el);
+  });
+}
+
+function formatBytes(b) {
+  if (b < 1024 * 1024) return (b / 1024).toFixed(0) + ' KB';
+  return (b / 1024 / 1024).toFixed(1) + ' MB';
+}
+
+function triggerDownload(item) {
+  const url = URL.createObjectURL(item.result.blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = item.result.filename;
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(url), 5000);
+}
+
+function addFiles(newFiles) {
+  for (const f of newFiles) {
+    if (!f.name.toLowerCase().endsWith('.ncm')) continue;
+    if (files.find(x => x.file.name === f.name && x.file.size === f.size)) continue;
+    files.push({ file: f, id: Date.now() + Math.random(), status: 'waiting', result: null });
+  }
+  renderFileList();
+}
+
+dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('dragging'); });
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragging'));
+dropZone.addEventListener('drop', e => {
+  e.preventDefault();
+  dropZone.classList.remove('dragging');
+  addFiles(Array.from(e.dataTransfer.files));
+});
+fileInput.addEventListener('change', () => { addFiles(Array.from(fileInput.files)); fileInput.value = ''; });
+
+btnClear.addEventListener('click', () => {
+  files = [];
+  renderFileList();
+});
+
+btnConvert.addEventListener('click', async () => {
+  btnConvert.disabled = true;
+  // auto-open debug panel on convert
+  debugPanel.classList.add('open');
+  for (const item of files) {
+    if (item.status === 'done') continue;
+    item.status = 'converting';
+    renderFileList();
+    dblog(`── Starting: ${item.file.name} (${formatBytes(item.file.size)}) ──`, 'info');
+    try {
+      const buf = await item.file.arrayBuffer();
+      const { audioData, format, meta, coverData } = await parseNCM(buf);
+
+      let finalAudio = audioData;
+      if (format === 'mp3') {
+        if (meta || coverData) {
+          const id3 = buildID3Tag(meta, coverData);
+          finalAudio = new Uint8Array(id3.length + audioData.length);
+          finalAudio.set(id3, 0);
+          finalAudio.set(audioData, id3.length);
+          dblog(`ID3 tag prepended (${id3.length} bytes)`, 'info');
+        }
+      } else if (format === 'flac') {
+        if (coverData) {
+          finalAudio = injectFlacCover(audioData, coverData);
+        }
+      }
+
+      const mimeType = format === 'flac' ? 'audio/flac' : 'audio/mpeg';
+      const blob = new Blob([finalAudio], { type: mimeType });
+      const basename = item.file.name.replace(/\.ncm$/i, '');
+      item.result = { blob, filename: `${basename}.${format}` };
+      item.status = 'done';
+
+      if (coverData) {
+        item.coverSrc = URL.createObjectURL(new Blob([coverData], { type: 'image/jpeg' }));
+      }
+      if (meta) {
+        const artist = Array.isArray(meta.artist) ? meta.artist.map(a => a[0]).join(', ') : (meta.artist || '');
+        item.displayName = meta.musicName || meta.name || basename;
+        item.metaInfo = [artist, meta.album].filter(Boolean).join(' · ') + ` — ${format.toUpperCase()}`;
+      }
+      dblog(`✓ Done: ${item.result.filename}`, 'ok');
+    } catch (err) {
+      item.status = 'error';
+      item.metaInfo = err.message;
+      dblog(`✗ Error: ${err.message}`, 'error');
+      if (err.stack) dblog(err.stack.split('\n')[1]?.trim() || '', 'error');
+    }
+    renderFileList();
+  }
+  btnConvert.disabled = false;
+});
+</script>
+</body>
+</html>
