@@ -8,54 +8,54 @@
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
-      --bg: #0f1117; --surface: #1a1d27; --border: #2e3148;
-      --accent: #6c63ff; --text: #e8eaf0; --text-muted: #8b8fa8; --radius: 12px;
+      --bg: #F4EFE8; --surface: #FEFCF9; --border: #E0D9D0;
+      --accent: #546475; --text: #2C2825; --text-muted: #6B625C; --radius: 12px;
     }
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; }
-    nav { background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 32px; height: 60px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
-    .nav-logo { font-size: 18px; font-weight: 700; color: var(--accent); text-decoration: none; }
-    .nav-links { display: flex; gap: 28px; list-style: none; }
-    .nav-links a { color: var(--text-muted); text-decoration: none; font-size: 14px; transition: color 0.2s; }
-    .nav-links a:hover, .nav-links a.active { color: var(--text); }
-    .container { max-width: 720px; margin: 0 auto; padding: 64px 24px; }
-    .updated { font-size: 13px; color: var(--text-muted); margin-bottom: 48px; }
-    h1 { font-size: 36px; font-weight: 800; margin-bottom: 10px; letter-spacing: -0.5px; }
-    h1 span { color: var(--accent); }
-    .intro { color: var(--text-muted); font-size: 15px; line-height: 1.7; margin-bottom: 48px; }
-    .policy-section { margin-bottom: 40px; }
-    .policy-section h2 { font-size: 18px; font-weight: 700; margin-bottom: 12px; padding-bottom: 10px; border-bottom: 1px solid var(--border); }
-    .policy-section p, .policy-section li { color: var(--text-muted); font-size: 14px; line-height: 1.8; margin-bottom: 10px; }
-    .policy-section ul { padding-left: 20px; }
-    .policy-section li { margin-bottom: 6px; }
+    body { font-family: "Inter","PingFang SC","Noto Sans SC",-apple-system,BlinkMacSystemFont,sans-serif; background-color:#F4EFE8; background-image:radial-gradient(circle,rgba(0,0,0,.06) 1px,transparent 1px); background-size:22px 22px; color:var(--text); min-height:100vh; display:flex; flex-direction:column; padding-top:60px; padding-bottom:80px; }
+    nav { background:rgba(254,252,249,.88); backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px); border-bottom:1px solid var(--border); padding:0 32px; height:60px; display:flex; align-items:center; justify-content:space-between; position:fixed; top:0; left:0; right:0; z-index:100; }
+    .nav-logo { font-size:18px; font-weight:700; color:var(--accent); text-decoration:none; }
+    .nav-links { display:flex; gap:28px; list-style:none; }
+    .nav-links a { color:var(--text-muted); text-decoration:none; font-size:14px; transition:color 0.2s; }
+    .nav-links a:hover, .nav-links a.active { color:var(--text); }
+    .container { max-width:720px; margin:0 auto; padding:64px 24px; }
+    .updated { font-size:13px; color:var(--text-muted); margin-bottom:48px; }
+    h1 { font-size:36px; font-weight:800; margin-bottom:10px; letter-spacing:-0.5px; }
+    h1 span { color:var(--accent); }
+    .intro { color:var(--text-muted); font-size:15px; line-height:1.7; margin-bottom:48px; }
+    .policy-section { margin-bottom:40px; }
+    .policy-section h2 { font-size:18px; font-weight:700; margin-bottom:12px; padding-bottom:10px; border-bottom:1px solid var(--border); color:var(--text); }
+    .policy-section p, .policy-section li { color:var(--text-muted); font-size:14px; line-height:1.8; margin-bottom:10px; }
+    .policy-section ul { padding-left:20px; }
+    .policy-section li { margin-bottom:6px; }
     .highlight-box {
-      background: rgba(108, 99, 255, 0.08); border: 1px solid rgba(108, 99, 255, 0.25);
-      border-radius: 8px; padding: 16px 20px; margin: 16px 0;
+      background:rgba(84,100,117,.07); border:1px solid rgba(84,100,117,.2);
+      border-radius:8px; padding:16px 20px; margin:16px 0;
     }
-    .highlight-box p { color: var(--text); margin: 0; font-size: 14px; }
-    footer { margin-top: auto; background: var(--surface); border-top: 1px solid var(--border); padding: 32px 24px; }
-    .footer-inner { max-width: 800px; margin: 0 auto; display: flex; flex-wrap: wrap; gap: 16px; justify-content: space-between; align-items: center; }
-    .footer-copy { font-size: 13px; color: var(--text-muted); }
-    .footer-links { display: flex; gap: 20px; }
-    .footer-links a { font-size: 13px; color: var(--text-muted); text-decoration: none; }
-    .footer-links a:hover { color: var(--text); }
+    .highlight-box p { color:var(--text); margin:0; font-size:14px; }
+    footer { position:fixed; bottom:0; left:0; right:0; background:#1A1816; border-top:1px solid rgba(255,255,255,.06); padding:20px 24px; }
+    .footer-inner { max-width:800px; margin:0 auto; display:flex; flex-wrap:wrap; gap:16px; justify-content:space-between; align-items:center; }
+    .footer-copy { font-size:13px; color:rgba(255,255,255,.45); }
+    .footer-links { display:flex; gap:20px; }
+    .footer-links a { font-size:13px; color:rgba(255,255,255,.45); text-decoration:none; }
+    .footer-links a:hover { color:rgba(255,255,255,.7); }
   </style>
 </head>
-<body>
+<body data-page="privacy">
 <nav>
   <a class="nav-logo" href="index.html">NCMConverter</a>
   <ul class="nav-links">
-    <li><a href="index.html">Converter</a></li>
-    <li><a href="about.html">About</a></li>
-    <li><a href="contact.html">Contact</a></li>
-    <li><a href="privacy.html" class="active">Privacy</a></li>
+    <li><a href="index.html" data-i18n="nav.converter">Converter</a></li>
+    <li><a href="about.html" data-i18n="nav.about">About</a></li>
+    <li><a href="contact.html" data-i18n="nav.contact">Contact</a></li>
+    <li><a href="privacy.html" class="active" data-i18n="nav.privacy">Privacy</a></li>
   </ul>
 </nav>
 
 <div class="container">
-  <h1><span>Privacy</span> Policy</h1>
-  <p class="updated">Last updated: March 2025</p>
+  <h1 data-i18n="privacy.h1"><span>Privacy</span> Policy</h1>
+  <p class="updated" data-i18n="privacy.updated">Last updated: March 2025</p>
 
-  <p class="intro">NCMConverter ("we", "our", or "us") is committed to protecting your privacy. This policy explains what information we collect, how we use it, and your rights. Please read it carefully.</p>
+  <p class="intro" data-i18n="privacy.intro">NCMConverter ("we", "our", or "us") is committed to protecting your privacy. This policy explains what information we collect, how we use it, and your rights. Please read it carefully.</p>
 
   <div class="policy-section">
     <h2>1. Information We Do NOT Collect</h2>
@@ -148,14 +148,15 @@
 
 <footer>
   <div class="footer-inner">
-    <span class="footer-copy">© 2025 NCMConverter. All rights reserved.</span>
+    <span class="footer-copy" data-i18n="footer.copy">© 2025 NCMConverter. All rights reserved.</span>
     <div class="footer-links">
-      <a href="about.html">About Us</a>
-      <a href="contact.html">Contact</a>
-      <a href="privacy.html">Privacy Policy</a>
-      <a href="terms.html">Terms of Service</a>
+      <a href="about.html" data-i18n="footer.about">About Us</a>
+      <a href="contact.html" data-i18n="footer.contact">Contact</a>
+      <a href="privacy.html" data-i18n="footer.privacy">Privacy Policy</a>
+      <a href="terms.html" data-i18n="footer.terms">Terms of Service</a>
     </div>
   </div>
 </footer>
+<script src="i18n.js"></script>
 </body>
 </html>

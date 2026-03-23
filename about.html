@@ -8,104 +8,105 @@
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
-      --bg: #0f1117; --surface: #1a1d27; --surface2: #232636; --border: #2e3148;
-      --accent: #6c63ff; --text: #e8eaf0; --text-muted: #8b8fa8; --radius: 12px;
+      --bg: #F4EFE8; --surface: #FEFCF9; --surface2: #ECE7E0; --border: #E0D9D0;
+      --accent: #546475; --text: #2C2825; --text-muted: #6B625C; --radius: 12px;
     }
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; }
-    nav { background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 32px; height: 60px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
-    .nav-logo { font-size: 18px; font-weight: 700; color: var(--accent); text-decoration: none; }
-    .nav-links { display: flex; gap: 28px; list-style: none; }
-    .nav-links a { color: var(--text-muted); text-decoration: none; font-size: 14px; transition: color 0.2s; }
-    .nav-links a:hover, .nav-links a.active { color: var(--text); }
-    .container { max-width: 720px; margin: 0 auto; padding: 64px 24px; }
-    h1 { font-size: 36px; font-weight: 800; margin-bottom: 12px; letter-spacing: -0.5px; }
-    h1 span { color: var(--accent); }
-    .subtitle { color: var(--text-muted); font-size: 17px; margin-bottom: 56px; line-height: 1.6; }
-    .section { margin-bottom: 48px; }
-    .section h2 { font-size: 20px; font-weight: 700; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid var(--border); }
-    .section p { color: var(--text-muted); font-size: 15px; line-height: 1.8; margin-bottom: 12px; }
-    .values { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-top: 16px; }
-    .value-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; }
-    .value-card .icon { font-size: 24px; margin-bottom: 10px; }
-    .value-card h3 { font-size: 14px; font-weight: 700; margin-bottom: 6px; }
-    .value-card p { font-size: 13px; color: var(--text-muted); line-height: 1.5; margin: 0; }
-    footer { margin-top: auto; background: var(--surface); border-top: 1px solid var(--border); padding: 32px 24px; }
-    .footer-inner { max-width: 800px; margin: 0 auto; display: flex; flex-wrap: wrap; gap: 16px; justify-content: space-between; align-items: center; }
-    .footer-copy { font-size: 13px; color: var(--text-muted); }
-    .footer-links { display: flex; gap: 20px; }
-    .footer-links a { font-size: 13px; color: var(--text-muted); text-decoration: none; }
-    .footer-links a:hover { color: var(--text); }
+    body { font-family: "Inter","PingFang SC","Noto Sans SC",-apple-system,BlinkMacSystemFont,sans-serif; background-color:#F4EFE8; background-image:radial-gradient(circle,rgba(0,0,0,.06) 1px,transparent 1px); background-size:22px 22px; color:var(--text); min-height:100vh; display:flex; flex-direction:column; padding-top:60px; padding-bottom:80px; }
+    nav { background:rgba(254,252,249,.88); backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px); border-bottom:1px solid var(--border); padding:0 32px; height:60px; display:flex; align-items:center; justify-content:space-between; position:fixed; top:0; left:0; right:0; z-index:100; }
+    .nav-logo { font-size:18px; font-weight:700; color:var(--accent); text-decoration:none; }
+    .nav-links { display:flex; gap:28px; list-style:none; }
+    .nav-links a { color:var(--text-muted); text-decoration:none; font-size:14px; transition:color 0.2s; }
+    .nav-links a:hover, .nav-links a.active { color:var(--text); }
+    .container { max-width:720px; margin:0 auto; padding:64px 24px; }
+    h1 { font-size:36px; font-weight:800; margin-bottom:12px; letter-spacing:-0.5px; }
+    h1 span { color:var(--accent); }
+    .subtitle { color:var(--text-muted); font-size:17px; margin-bottom:56px; line-height:1.6; }
+    .section { margin-bottom:48px; }
+    .section h2 { font-size:20px; font-weight:700; margin-bottom:16px; padding-bottom:12px; border-bottom:1px solid var(--border); color:var(--text); }
+    .section p { color:var(--text-muted); font-size:15px; line-height:1.8; margin-bottom:12px; }
+    .values { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:16px; margin-top:16px; }
+    .value-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:20px; box-shadow:0 1px 2px rgba(0,0,0,.04); }
+    .value-card .icon { font-size:24px; margin-bottom:10px; }
+    .value-card h3 { font-size:14px; font-weight:700; margin-bottom:6px; color:var(--text); }
+    .value-card p { font-size:13px; color:var(--text-muted); line-height:1.5; margin:0; }
+    footer { position:fixed; bottom:0; left:0; right:0; background:#1A1816; border-top:1px solid rgba(255,255,255,.06); padding:20px 24px; }
+    .footer-inner { max-width:800px; margin:0 auto; display:flex; flex-wrap:wrap; gap:16px; justify-content:space-between; align-items:center; }
+    .footer-copy { font-size:13px; color:rgba(255,255,255,.45); }
+    .footer-links { display:flex; gap:20px; }
+    .footer-links a { font-size:13px; color:rgba(255,255,255,.45); text-decoration:none; }
+    .footer-links a:hover { color:rgba(255,255,255,.7); }
   </style>
 </head>
-<body>
+<body data-page="about">
 <nav>
   <a class="nav-logo" href="index.html">NCMConverter</a>
   <ul class="nav-links">
-    <li><a href="index.html">Converter</a></li>
-    <li><a href="about.html" class="active">About</a></li>
-    <li><a href="contact.html">Contact</a></li>
-    <li><a href="privacy.html">Privacy</a></li>
+    <li><a href="index.html" data-i18n="nav.converter">Converter</a></li>
+    <li><a href="about.html" class="active" data-i18n="nav.about">About</a></li>
+    <li><a href="contact.html" data-i18n="nav.contact">Contact</a></li>
+    <li><a href="privacy.html" data-i18n="nav.privacy">Privacy</a></li>
   </ul>
 </nav>
 
 <div class="container">
-  <h1>About <span>NCMConverter</span></h1>
-  <p class="subtitle">A free, privacy-first tool built for music lovers who want to play their NetEase library anywhere.</p>
+  <h1 data-i18n="about.h1">About <span>NCMConverter</span></h1>
+  <p class="subtitle" data-i18n="about.subtitle">A free, privacy-first tool built for music lovers who want to play their NetEase library anywhere.</p>
 
   <div class="section">
-    <h2>Our Story</h2>
-    <p>NCMConverter was born from a simple frustration: you download music from NetEase Cloud Music, but the .ncm format locks it inside a single app. Take your phone offline, switch devices, or just want to listen on a different player — and suddenly your own music library is inaccessible.</p>
-    <p>We built NCMConverter to solve that problem. The tool is free, runs entirely in your browser, and requires no account or personal information. Your files never leave your device.</p>
+    <h2 data-i18n="about.story.h">Our Story</h2>
+    <p data-i18n="about.story.p1">NCMConverter was born from a simple frustration: you download music from NetEase Cloud Music, but the .ncm format locks it inside a single app. Take your phone offline, switch devices, or just want to listen on a different player — and suddenly your own music library is inaccessible.</p>
+    <p data-i18n="about.story.p2">We built NCMConverter to solve that problem. The tool is free, runs entirely in your browser, and requires no account or personal information. Your files never leave your device.</p>
   </div>
 
   <div class="section">
-    <h2>What We Believe</h2>
+    <h2 data-i18n="about.values.h">What We Believe</h2>
     <div class="values">
       <div class="value-card">
         <div class="icon">🔒</div>
-        <h3>Privacy by Default</h3>
-        <p>No file uploads, no servers, no tracking beyond standard analytics. Your music stays yours.</p>
+        <h3 data-i18n="about.val.privacy.h">Privacy by Default</h3>
+        <p data-i18n="about.val.privacy.p">No file uploads, no servers, no tracking beyond standard analytics. Your music stays yours.</p>
       </div>
       <div class="value-card">
         <div class="icon">⚡</div>
-        <h3>Simplicity First</h3>
-        <p>One page, one job. Drop a file, click convert, download. That's it.</p>
+        <h3 data-i18n="about.val.simplicity.h">Simplicity First</h3>
+        <p data-i18n="about.val.simplicity.p">One page, one job. Drop a file, click convert, download. That's it.</p>
       </div>
       <div class="value-card">
         <div class="icon">🌍</div>
-        <h3>Free for Everyone</h3>
-        <p>Supported by non-intrusive advertising so we can keep the lights on without charging users.</p>
+        <h3 data-i18n="about.val.free.h">Free for Everyone</h3>
+        <p data-i18n="about.val.free.p">Supported by non-intrusive advertising so we can keep the lights on without charging users.</p>
       </div>
       <div class="value-card">
         <div class="icon">🎵</div>
-        <h3>Zero Quality Loss</h3>
-        <p>We extract the original audio stream — no re-encoding, no compression artifacts.</p>
+        <h3 data-i18n="about.val.quality.h">Zero Quality Loss</h3>
+        <p data-i18n="about.val.quality.p">We extract the original audio stream — no re-encoding, no compression artifacts.</p>
       </div>
     </div>
   </div>
 
   <div class="section">
-    <h2>How It Works</h2>
-    <p>The .ncm format is a standard MP3 or FLAC file wrapped in a proprietary encryption layer. NCMConverter uses your browser's built-in cryptography (WebCrypto API) to decrypt the audio stream locally, then packages it with the original metadata and cover art.</p>
-    <p>Because everything runs in JavaScript inside your browser tab, there is no backend server involved. Processing speed depends only on your device's performance.</p>
+    <h2 data-i18n="about.how.h">How It Works</h2>
+    <p data-i18n="about.how.p1">The .ncm format is a standard MP3 or FLAC file wrapped in a proprietary encryption layer. NCMConverter uses your browser's built-in cryptography (WebCrypto API) to decrypt the audio stream locally, then packages it with the original metadata and cover art.</p>
+    <p data-i18n="about.how.p2">Because everything runs in JavaScript inside your browser tab, there is no backend server involved. Processing speed depends only on your device's performance.</p>
   </div>
 
   <div class="section">
-    <h2>Responsible Use</h2>
-    <p>NCMConverter is intended for personal use — converting music you have legitimately purchased or downloaded for offline playback. Please respect artists and copyright law in your jurisdiction. We do not condone or facilitate piracy.</p>
+    <h2 data-i18n="about.responsible.h">Responsible Use</h2>
+    <p data-i18n="about.responsible.p">NCMConverter is intended for personal use — converting music you have legitimately purchased or downloaded for offline playback. Please respect artists and copyright law in your jurisdiction. We do not condone or facilitate piracy.</p>
   </div>
 </div>
 
 <footer>
   <div class="footer-inner">
-    <span class="footer-copy">© 2025 NCMConverter. All rights reserved.</span>
+    <span class="footer-copy" data-i18n="footer.copy">© 2025 NCMConverter. All rights reserved.</span>
     <div class="footer-links">
-      <a href="about.html">About Us</a>
-      <a href="contact.html">Contact</a>
-      <a href="privacy.html">Privacy Policy</a>
-      <a href="terms.html">Terms of Service</a>
+      <a href="about.html" data-i18n="footer.about">About Us</a>
+      <a href="contact.html" data-i18n="footer.contact">Contact</a>
+      <a href="privacy.html" data-i18n="footer.privacy">Privacy Policy</a>
+      <a href="terms.html" data-i18n="footer.terms">Terms of Service</a>
     </div>
   </div>
 </footer>
+<script src="i18n.js"></script>
 </body>
 </html>
